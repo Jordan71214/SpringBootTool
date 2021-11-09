@@ -2,8 +2,10 @@ package com.mail.demo.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 
 @Configuration
+@PropertySource(value = "classpath:mail.properties")
 public class MailConfig {
 
     @Value("${mail.host}")
