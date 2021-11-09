@@ -1,8 +1,10 @@
 package com.mail.demo.service;
 
+import com.mail.demo.config.MailConfig;
 import com.mail.demo.entity.MailRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -14,32 +16,27 @@ import java.util.Properties;
 @Service
 public class MailService {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
+    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    @Autowired
+    MailConfig mailConfig;
     private JavaMailSenderImpl javaMailSender;
 
-    private static String HOST = "smtp.gmail.com";
-    private static int PORT = 587;
-    private static boolean AUTH_ENABLE = true;
-    private static boolean STARTTLS_ENABLE = true;
-    private static String PROTOCOL = "smtp";
-    private static String USERNAME = "your_email_address@gmail.com";
-    private static String PASSWORD = "your_password";
 
     @PostConstruct
     public void init() {
         javaMailSender = new JavaMailSenderImpl();
-        javaMailSender.setHost(HOST);
-        javaMailSender.setPort(PORT);
-        javaMailSender.setUsername(USERNAME);
-        javaMailSender.setPassword(PASSWORD);
+        javaMailSender.setHost(mailConfig.getHost());
+        javaMailSender.setPort(mailConfig.getPort());
+        javaMailSender.setUsername(mailConfig.getUsername());
+        javaMailSender.setPassword(mailConfig.getPassword());
 
         //        Properties properties = javaMailSender.getJavaMailProperties();
 
         Properties properties = new Properties();
-        properties.put("mail.smtp.auth", AUTH_ENABLE);
-        properties.put("mail.smtp.starttls.enable", STARTTLS_ENABLE);
-        properties.put("mail.transport.protocol", PROTOCOL);
+        properties.put("mail.smtp.auth", mailConfig.isAuthEnable());
+        properties.put("mail.smtp.starttls.enable", mailConfig.isStarttlsEnable());
+        properties.put("mail.transport.protocol", mailConfig.getProtocol());
 
         javaMailSender.setJavaMailProperties(properties);
 
@@ -47,7 +44,7 @@ public class MailService {
 
     public void sendMail(MailRequest request) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(USERNAME);
+        message.setFrom(mailConfig.getUsername());
         message.setTo(request.getReceivers());
         message.setSubject(request.getSubject());
         message.setText(request.getContent());
